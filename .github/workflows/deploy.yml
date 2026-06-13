@@ -22,8 +22,10 @@ jobs:
       - name: Stage site files
         if: ${{ env.FTP_SERVER != '' }}
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin >/dev/null
           mkdir -p _site
-          cp index.html _site/
+          cp index.html favicon.svg robots.txt _site/
+          rsvg-convert og-image.svg -o _site/og-image.png
 
       - name: Ensure remote directory exists
         if: ${{ env.FTP_SERVER != '' }}
@@ -62,7 +64,9 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
           # The webserver (www-data) must be able to traverse the dir and read the files.
           {
-            printf -- 'chmod 755 %s\n' "$REMOTE_DIR"
-            printf -- 'chmod 644 %s/index.html\n' "$REMOTE_DIR"
+            printf -- '-chmod 755 %s\n' "$REMOTE_DIR"
+            for f in index.html favicon.svg robots.txt og-image.png; do
+              printf -- '-chmod 644 %s/%s\n' "$REMOTE_DIR" "$f"
+            done
           } > /tmp/perm.sftp
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
