@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin >/dev/null
           mkdir -p _site
-          cp index.html favicon.svg robots.txt _site/
+          cp index.html impressum.html datenschutz.html favicon.svg robots.txt _site/
           rsvg-convert og-image.svg -o _site/og-image.png
 
       - name: Ensure remote directory exists
@@ -67,7 +67,7 @@ jobs:
           # The webserver (www-data) must be able to traverse the dir and read the files.
           {
             printf -- '-chmod 755 %s\n' "$REMOTE_DIR"
-            for f in index.html favicon.svg robots.txt og-image.png; do
+            for f in index.html impressum.html datenschutz.html favicon.svg robots.txt og-image.png; do
               printf -- '-chmod 644 %s/%s\n' "$REMOTE_DIR" "$f"
             done
           } > /tmp/perm.sftp
