@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
           printf -- '-mkdir %s\n' "$REMOTE_DIR" > /tmp/mk.sftp
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/mk.sftp "$SFTP_USER@$SFTP_HOST" || true
+          sshpass -e sftp -4 -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/mk.sftp "$SFTP_USER@$SFTP_HOST" || true
 
       - name: Deploy via SFTP
         if: ${{ env.FTP_SERVER != '' }}
@@ -51,6 +51,8 @@ jobs:
           local_path: './_site/*'
           remote_path: ${{ vars.FTP_SERVER_DIR || '.' }}
           sftp_only: true
+          # Force IPv4: the runner intermittently cannot reach the host over IPv6.
+          sftpArgs: '-4'
 
       - name: Fix remote permissions
         if: ${{ env.FTP_SERVER != '' }}
@@ -69,4 +71,4 @@ jobs:
               printf -- '-chmod 644 %s/%s\n' "$REMOTE_DIR" "$f"
             done
           } > /tmp/perm.sftp
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
+          sshpass -e sftp -4 -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
