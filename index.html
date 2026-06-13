@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AudioQualityEnhancer – YouTube zu Audio, in echter Qualität</title>
+    <meta name="description"
+        content="Lade den besten Audio-Stream eines Videos herunter – ohne doppelten Qualitätsverlust, mit echter Loudness-Normalisierung, verlustfreiem FLAC, Metadaten und Cover. Ehrlich, lokal, ohne Werbung." />
+    <meta name="color-scheme" content="dark light" />
+    <style>
+        :root {
+            --bg: #0f1115;
+            --bg-soft: #161a21;
+            --card: #1b2029;
+            --text: #e7ecf3;
+            --muted: #9aa6b6;
+            --accent: #4cc2ff;
+            --accent-2: #7c5cff;
+            --border: #283040;
+            --ok: #57d18a;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(1200px 600px at 70% -10%, #1a2436 0%, var(--bg) 55%);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        .wrap {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 0;
+        }
+
+        .brand {
+            font-weight: 700;
+            letter-spacing: .2px;
+            font-size: 1.05rem;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            margin-left: 22px;
+            font-size: .95rem;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        .hero {
+            padding: 56px 0 40px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: .8rem;
+            color: var(--accent);
+            background: rgba(76, 194, 255, .1);
+            border: 1px solid rgba(76, 194, 255, .25);
+            padding: 5px 12px;
+            border-radius: 999px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4.5vw, 3.1rem);
+            line-height: 1.12;
+            margin: 0 0 16px;
+        }
+
+        h1 .grad {
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .lead {
+            font-size: 1.18rem;
+            color: var(--muted);
+            max-width: 680px;
+            margin: 0 0 28px;
+        }
+
+        .cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            color: #07121b;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn-ghost {
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-top: 12px;
+        }
+
+        section {
+            padding: 44px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            margin: 0 0 8px;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 0 0 28px;
+            max-width: 720px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 1.12rem;
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: .96rem;
+        }
+
+        .icon {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        ol.steps {
+            counter-reset: s;
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        ol.steps li {
+            counter-increment: s;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        ol.steps li::before {
+            content: counter(s);
+            display: inline-grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(76, 194, 255, .12);
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .downloads {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .dl {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+        }
+
+        .dl .tag {
+            font-size: .8rem;
+            color: var(--ok);
+            font-weight: 600;
+        }
+
+        .legal {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            color: var(--muted);
+            font-size: .92rem;
+        }
+
+        footer {
+            padding: 30px 0 50px;
+            color: var(--muted);
+            font-size: .9rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="brand">Audio<span>Quality</span>Enhancer</div>
+            <nav>
+                <a href="#features">Vorteile</a>
+                <a href="#how">So geht's</a>
+                <a href="#download">Download</a>
+            </nav>
+        </header>
+
+        <section class="hero" style="border-top:none">
+            <span class="badge">Windows-Desktop-App · kostenlos · ohne Werbung</span>
+            <h1>YouTube zu Audio –<br /><span class="grad">in echter Qualität.</span></h1>
+            <p class="lead">
+                Andere yt-to-mp3-Seiten versprechen „320&nbsp;kbps" und rechnen dafür einen bereits
+                verlustbehafteten Stream nochmal hoch. AudioQualityEnhancer lädt den <strong>besten
+                    Original-Audio-Stream</strong> – ohne doppelten Verlust – und veredelt ihn dann mit
+                echter Loudness-Normalisierung, verlustfreiem FLAC, Metadaten und Cover.
+            </p>
+            <div class="cta">
+                <a class="btn btn-primary" href="https://github.com/Kentarohakase/AudioQualityEnhancer/releases/latest">Kostenlos herunterladen</a>
+                <a class="btn btn-ghost" href="https://github.com/Kentarohakase/AudioQualityEnhancer">Quellcode auf GitHub</a>
+            </div>
+            <p class="note">Läuft lokal auf deinem PC. Keine Uploads, keine Werbung, keine Längenlimits.</p>
+        </section>
+
+        <section id="features">
+            <h2>Warum besser als die üblichen Seiten</h2>
+            <p class="sub">Der Unterschied ist nicht ein größerer MP3-Knopf, sondern ehrliche, technisch
+                korrekte Verarbeitung.</p>
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>Kein doppelter Verlust</h3>
+                    <p>Lädt den originalen besten Audio-Stream (oft Opus/AAC) und remuxt ihn ohne erneute
+                        verlustbehaftete Kodierung. Transparenz statt „320-kbps"-Marketing.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📏</div>
+                    <h3>Echte Loudness-Normalisierung</h3>
+                    <p>EBU R128 mit wählbarem Ziel (−14 Streaming, −16 Podcast, −23 Broadcast) und
+                        True-Peak-Begrenzung – konsistente Lautheit über alle Tracks.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">💎</div>
+                    <h3>Verlustfreies Archiv</h3>
+                    <p>Optionaler FLAC-Export für die bestmögliche Aufbewahrung – nicht nur eine weitere
+                        kleine MP3.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🏷️</div>
+                    <h3>Metadaten &amp; Cover</h3>
+                    <p>Titel, Künstler und Cover werden eingebettet und bleiben im Export erhalten
+                        (FLAC, MP3, M4A).</p>
+                </div>
+                <div class="card">
+                    <div class="icon">✂️</div>
+                    <h3>Kapitel &amp; SponsorBlock</h3>
+                    <p>Lange Videos auf Wunsch in einzelne Tracks aufteilen und Werbe-/Sponsor-Segmente
+                        automatisch entfernen.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔒</div>
+                    <h3>Lokal &amp; privat</h3>
+                    <p>Alles läuft auf deinem Rechner. Keine Server, keine Werbung, kein Tracking,
+                        Open Source.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="how">
+            <h2>So geht's</h2>
+            <p class="sub">Drei Schritte vom Link zur fertigen Datei.</p>
+            <ol class="steps">
+                <li>
+                    <strong>URL einfügen</strong>
+                    <p style="margin:.4rem 0 0;color:var(--muted)">Video-/Audio-Adresse in das Feld
+                        einfügen und optional Kapitel-Split oder SponsorBlock aktivieren.</p>
+                </li>
+                <li>
+                    <strong>Preset wählen</strong>
+                    <p style="margin:.4rem 0 0;color:var(--muted)">Musik (FLAC), Podcast (−16&nbsp;LUFS),
+                        Sprache – das Preset bestimmt die Ausgabequalität.</p>
+                </li>
+                <li>
+                    <strong>Verarbeiten</strong>
+                    <p style="margin:.4rem 0 0;color:var(--muted)">Download, Normalisierung und Export
+                        laufen automatisch. Fertig.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section id="download">
+            <h2>Download</h2>
+            <p class="sub">Windows&nbsp;x64. Zwei Varianten – mit FFmpeg ist alles enthalten und sofort
+                startklar.</p>
+            <div class="downloads">
+                <div class="dl">
+                    <div class="tag">Empfohlen</div>
+                    <h3>Mit FFmpeg &amp; yt-dlp</h3>
+                    <p style="color:var(--muted)">Alles dabei: FFmpeg, ffprobe und der URL-Downloader
+                        sind enthalten und werden automatisch aktuell gehalten.</p>
+                    <p style="margin-top:14px"><a class="btn btn-primary"
+                            href="https://github.com/Kentarohakase/AudioQualityEnhancer/releases/latest">Zur
+                            neuesten Version</a></p>
+                </div>
+                <div class="dl">
+                    <h3>Ohne FFmpeg</h3>
+                    <p style="color:var(--muted)">Kleineres Paket für alle, die FFmpeg bereits installiert
+                        haben oder selbst bereitstellen.</p>
+                    <p style="margin-top:14px"><a class="btn btn-ghost"
+                            href="https://github.com/Kentarohakase/AudioQualityEnhancer/releases/latest">Zur
+                            neuesten Version</a></p>
+                </div>
+            </div>
+            <p class="note">Jedes Paket enthält eine SHA256-Prüfsumme. Bei der SmartScreen-Warnung:
+                „Weitere Informationen" → „Trotzdem ausführen".</p>
+        </section>
+
+        <section>
+            <h2>Fairer Umgang</h2>
+            <div class="legal">
+                Bitte lade nur Inhalte herunter, an denen du die nötigen Rechte hast (eigene Inhalte,
+                frei lizenziertes oder gemeinfreies Material). Die Einhaltung der Nutzungsbedingungen der
+                jeweiligen Plattform und des Urheberrechts liegt in deiner Verantwortung.
+            </div>
+        </section>
+
+        <footer>
+            <div class="wrap" style="padding:0">
+                AudioQualityEnhancer · Open Source auf
+                <a href="https://github.com/Kentarohakase/AudioQualityEnhancer">GitHub</a> ·
+                nutzt FFmpeg und yt-dlp (jeweils eigene Lizenzen).
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
