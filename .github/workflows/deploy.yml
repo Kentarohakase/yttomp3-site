@@ -66,24 +66,3 @@ jobs:
             printf -- 'chmod 644 %s/index.html\n' "$REMOTE_DIR"
           } > /tmp/perm.sftp
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
-
-      - name: Clean up probe and stray folders (temporary)
-        if: ${{ env.FTP_SERVER != '' }}
-        env:
-          SSHPASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_HOST: ${{ secrets.FTP_SERVER }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PORT: ${{ vars.SFTP_PORT }}
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
-          {
-            printf -- '-rm html/yttomp3/probe-C.txt\n'
-            printf -- '-rm html/html/yttomp3.kentser.com/probe-A.txt\n'
-            printf -- '-rmdir html/html/yttomp3.kentser.com\n'
-            printf -- '-rmdir html/html\n'
-            printf -- '-rm yttomp3.kentser.com/probe-B.txt\n'
-            printf -- '-rmdir yttomp3.kentser.com\n'
-            printf -- '-rm html/yttomp3.kentser.com/index.html\n'
-            printf -- '-rmdir html/yttomp3.kentser.com\n'
-          } > /tmp/clean.sftp
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/clean.sftp "$SFTP_USER@$SFTP_HOST" || true
