@@ -26,6 +26,18 @@ jobs:
           mkdir -p _site
           cp index.html _site/
 
+      - name: Inspect remote layout (temporary)
+        if: ${{ env.FTP_SERVER != '' }}
+        env:
+          SSHPASS: ${{ secrets.FTP_PASSWORD }}
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PORT: ${{ vars.SFTP_PORT }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
+          printf 'pwd\nls -la\n' > /tmp/cmds.sftp
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/cmds.sftp "$SFTP_USER@$SFTP_HOST" || true
+
       - name: Deploy via SFTP
         if: ${{ env.FTP_SERVER != '' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
