@@ -53,3 +53,21 @@ jobs:
           # html/yttomp3.kentser.com. Point the easyname subdomain at this folder.
           remote_path: ${{ vars.FTP_SERVER_DIR || '.' }}
           sftp_only: true
+
+      - name: Fix remote permissions
+        if: ${{ env.FTP_SERVER != '' }}
+        env:
+          SSHPASS: ${{ secrets.FTP_PASSWORD }}
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PORT: ${{ vars.SFTP_PORT }}
+          REMOTE_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
+          # The webserver (www-data) must be able to traverse the dir and read the files.
+          {
+            printf -- 'chmod 755 %s\n' "$REMOTE_DIR"
+            printf -- 'chmod 644 %s/index.html\n' "$REMOTE_DIR"
+            printf -- 'ls -la %s\n' "$REMOTE_DIR"
+          } > /tmp/perm.sftp
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
