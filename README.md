@@ -10,13 +10,13 @@ Static single page (`index.html`), no build step, no dependencies.
 ## Deployment
 
 On every push to `main`, a GitHub Actions workflow uploads the site to the easyname webspace
-via FTPS (`.github/workflows/deploy.yml`).
+via SFTP (port 22) (`.github/workflows/deploy.yml`).
 
 ### Required GitHub secrets (Settings → Secrets and variables → Actions)
 
-- `FTP_SERVER` — easyname FTP host (e.g. `ftp.kentser.com` or the host from the easyname panel)
-- `FTP_USERNAME` — FTP account user
-- `FTP_PASSWORD` — FTP account password
+- `FTP_SERVER` — easyname SFTP host from the easyname panel (the SSH/SFTP server)
+- `FTP_USERNAME` — SFTP account user
+- `FTP_PASSWORD` — SFTP account password
 
 ### Optional repository variable
 
