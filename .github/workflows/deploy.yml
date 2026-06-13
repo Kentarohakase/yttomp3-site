@@ -12,8 +12,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Mapped here so the deploy step can skip itself until the secrets are set,
-    # avoiding a failed run before credentials exist.
+    # Mapped here so the deploy steps skip themselves until the secrets are set.
     env:
       FTP_SERVER: ${{ secrets.FTP_SERVER }}
     steps:
@@ -26,17 +25,19 @@ jobs:
           mkdir -p _site
           cp index.html _site/
 
-      - name: Inspect remote layout (temporary)
+      - name: Ensure remote directory exists
         if: ${{ env.FTP_SERVER != '' }}
         env:
           SSHPASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_HOST: ${{ secrets.FTP_SERVER }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PORT: ${{ vars.SFTP_PORT }}
+          REMOTE_DIR: ${{ vars.FTP_SERVER_DIR }}
         run: |
           sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
-          printf 'pwd\nls -la\n' > /tmp/cmds.sftp
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/cmds.sftp "$SFTP_USER@$SFTP_HOST" || true
+          # '-mkdir' ignores the error if the directory already exists.
+          printf -- '-mkdir %s\n' "$REMOTE_DIR" > /tmp/mk.sftp
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/mk.sftp "$SFTP_USER@$SFTP_HOST" || true
 
       - name: Deploy via SFTP
         if: ${{ env.FTP_SERVER != '' }}
@@ -48,7 +49,7 @@ jobs:
           # easyname uses a per-account SSH/SFTP port (not 22); set via repo variable.
           port: ${{ vars.SFTP_PORT || '22' }}
           local_path: './_site/*'
-          # Target folder on the webspace; set the repo variable FTP_SERVER_DIR
-          # to the subdomain's document root (e.g. /yttomp3.kentser.com/).
+          # Target folder on the webspace (relative to the SSH home), e.g.
+          # html/yttomp3.kentser.com. Point the easyname subdomain at this folder.
           remote_path: ${{ vars.FTP_SERVER_DIR || '.' }}
           sftp_only: true
