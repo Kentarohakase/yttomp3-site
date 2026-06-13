@@ -35,7 +35,6 @@ jobs:
           REMOTE_DIR: ${{ vars.FTP_SERVER_DIR }}
         run: |
           sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
-          # '-mkdir' ignores the error if the directory already exists.
           printf -- '-mkdir %s\n' "$REMOTE_DIR" > /tmp/mk.sftp
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/mk.sftp "$SFTP_USER@$SFTP_HOST" || true
 
@@ -46,11 +45,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # easyname uses a per-account SSH/SFTP port (not 22); set via repo variable.
           port: ${{ vars.SFTP_PORT || '22' }}
           local_path: './_site/*'
-          # Target folder on the webspace (relative to the SSH home), e.g.
-          # html/yttomp3.kentser.com. Point the easyname subdomain at this folder.
           remote_path: ${{ vars.FTP_SERVER_DIR || '.' }}
           sftp_only: true
 
@@ -68,11 +64,10 @@ jobs:
           {
             printf -- 'chmod 755 %s\n' "$REMOTE_DIR"
             printf -- 'chmod 644 %s/index.html\n' "$REMOTE_DIR"
-            printf -- 'ls -la %s\n' "$REMOTE_DIR"
           } > /tmp/perm.sftp
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/perm.sftp "$SFTP_USER@$SFTP_HOST" || true
 
-      - name: Probe docroot candidates (temporary)
+      - name: Clean up probe and stray folders (temporary)
         if: ${{ env.FTP_SERVER != '' }}
         env:
           SSHPASS: ${{ secrets.FTP_PASSWORD }}
@@ -81,21 +76,14 @@ jobs:
           SFTP_PORT: ${{ vars.SFTP_PORT }}
         run: |
           sudo apt-get update -qq && sudo apt-get install -y sshpass >/dev/null
-          echo A > A.txt; echo B > B.txt; echo C > C.txt
           {
-            printf -- '-mkdir html/html\n'
-            printf -- '-mkdir html/html/yttomp3.kentser.com\n'
-            printf -- 'put A.txt html/html/yttomp3.kentser.com/probe-A.txt\n'
-            printf -- 'chmod 755 html/html\n'
-            printf -- 'chmod 755 html/html/yttomp3.kentser.com\n'
-            printf -- 'chmod 644 html/html/yttomp3.kentser.com/probe-A.txt\n'
-            printf -- '-mkdir yttomp3.kentser.com\n'
-            printf -- 'put B.txt yttomp3.kentser.com/probe-B.txt\n'
-            printf -- 'chmod 755 yttomp3.kentser.com\n'
-            printf -- 'chmod 644 yttomp3.kentser.com/probe-B.txt\n'
-            printf -- '-mkdir html/yttomp3\n'
-            printf -- 'put C.txt html/yttomp3/probe-C.txt\n'
-            printf -- 'chmod 755 html/yttomp3\n'
-            printf -- 'chmod 644 html/yttomp3/probe-C.txt\n'
-          } > /tmp/probe.sftp
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/probe.sftp "$SFTP_USER@$SFTP_HOST" || true
+            printf -- '-rm html/yttomp3/probe-C.txt\n'
+            printf -- '-rm html/html/yttomp3.kentser.com/probe-A.txt\n'
+            printf -- '-rmdir html/html/yttomp3.kentser.com\n'
+            printf -- '-rmdir html/html\n'
+            printf -- '-rm yttomp3.kentser.com/probe-B.txt\n'
+            printf -- '-rmdir yttomp3.kentser.com\n'
+            printf -- '-rm html/yttomp3.kentser.com/index.html\n'
+            printf -- '-rmdir html/yttomp3.kentser.com\n'
+          } > /tmp/clean.sftp
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no -oBatchMode=no -b /tmp/clean.sftp "$SFTP_USER@$SFTP_HOST" || true
